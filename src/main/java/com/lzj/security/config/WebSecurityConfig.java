@@ -1,10 +1,15 @@
 package com.lzj.security.config;
 
 import com.lzj.security.component.CustomPasswordEncoder;
+import com.lzj.security.service.UserService;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
@@ -44,8 +49,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.csrf().disable(); //开启了CSRF保护，关闭即可 403 Forbidden
     }
 
-    //定义认证规则
-    @Override
+    //在内存中：定义认证规则
+   /* @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         //在内存中配置用户名、密码、角色
         auth.inMemoryAuthentication().withUser("admin").password("admin").roles("VIP1", "VIP2")
@@ -55,5 +60,41 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         .withUser("zhangsan").password("123").roles("VIP3")
         .and()
         .passwordEncoder(new CustomPasswordEncoder()); //There is no PasswordEncoder mapped for the id "null" 解决方案
+    }*/
+
+
+    /**
+     * 生成定义一个PasswordEncoder的Bean，配置加密方式，这里生成BCryptPasswordEncoder的Bean对象
+     */
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    /**
+     * 生成定义一个PasswordEncoder的Bean，配置明文加密方式，自定义CustomPasswordEncoder
+     */
+    @Bean
+    public PasswordEncoder myPasswordEncoder() {
+        return new CustomPasswordEncoder();
+    }
+
+    /**
+     * 生成一个自定义的UserDetailsServiceImpl的Bean，交给Spring IOC容器
+     */
+   @Bean
+   public UserDetailsService userDetailsService() {
+       return new UserService();
+   }
+
+    /**
+     * 通过数据库定制认证规则
+     * @param auth
+     * @throws Exception
+     */
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(userDetailsService()). //用户认证
+                passwordEncoder(myPasswordEncoder()); //使用加密验证
     }
 }
