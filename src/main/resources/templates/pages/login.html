@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<h1 align="center">欢迎登陆武林秘籍管理系统</h1>
+	<hr>
+	<div align="center">
+		<!--错误信息回显-->
+		<span style="color: red" th:if="${param.error}" th:text="${session.SPRING_SECURITY_LAST_EXCEPTION.message}"></span>
+		<form th:action="@{/userlogin}" method="post">
+			用户名:<input name="user"/><br>
+			密码:<input name="pwd"><br/>
+			<input type="checkbox" th:name="remember"><span>记住我</span><br>
+			<input type="submit" value="登陆"><br>
+		</form>
+	</div>
+</body>
+</html>
